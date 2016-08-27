@@ -1,9 +1,9 @@
-class Rock
+class Jack
   constructor: (x = 0, y = 0, n = 0) ->
-    PIXI.loader.add("rock-#{n}", 'assets/rock.png').load (loader, resources) =>
-      @texture = new PIXI.Sprite resources["rock-#{n}"].texture
+    PIXI.loader.add("jack-#{n}", 'assets/jack.png').load (loader, resources) =>
+      @texture = new PIXI.Sprite resources["jack-#{n}"].texture
 
-      @texture.type = 'rock'
+      @texture.type = 'jack'
 
       @texture.width = 100
       @texture.height = 100
@@ -18,4 +18,4 @@ class Rock
   texture: null
 
 # export
-module.exports = Rock
+module.exports = Jack

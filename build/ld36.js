@@ -1,4 +1,14 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+var action;
+
+action = function(type) {
+  return console.log(type);
+};
+
+module.exports = action;
+
+
+},{}],2:[function(require,module,exports){
 var collision;
 
 collision = function(o) {
@@ -32,10 +42,49 @@ collision = function(o) {
 module.exports = collision;
 
 
-},{}],2:[function(require,module,exports){
-var Player, collision;
+},{}],3:[function(require,module,exports){
+var Jack;
+
+Jack = (function() {
+  function Jack(x, y, n) {
+    if (x == null) {
+      x = 0;
+    }
+    if (y == null) {
+      y = 0;
+    }
+    if (n == null) {
+      n = 0;
+    }
+    PIXI.loader.add("jack-" + n, 'assets/jack.png').load((function(_this) {
+      return function(loader, resources) {
+        _this.texture = new PIXI.Sprite(resources["jack-" + n].texture);
+        _this.texture.type = 'jack';
+        _this.texture.width = 100;
+        _this.texture.height = 100;
+        _this.texture.position.x = x;
+        _this.texture.position.y = y;
+        stage.addChild(_this.texture);
+        return staticObjects.push(_this.texture);
+      };
+    })(this));
+  }
+
+  Jack.prototype.texture = null;
+
+  return Jack;
+
+})();
+
+module.exports = Jack;
+
+
+},{}],4:[function(require,module,exports){
+var Player, action, collision;
 
 collision = require('./collision');
+
+action = require('./action');
 
 Player = (function() {
   function Player(x, y) {
@@ -48,6 +97,7 @@ Player = (function() {
     PIXI.loader.add('player', 'assets/player.png').load((function(_this) {
       return function(loader, resources) {
         _this.texture = new PIXI.Sprite(resources.player.texture);
+        _this.texture.type = 'player';
         _this.texture.width = 150;
         _this.texture.height = 150;
         x -= _this.texture.width / 2;
@@ -80,9 +130,12 @@ Player = (function() {
               _this.distance.x += _this.step;
             }
             if (c.y === 'top') {
-              results.push(_this.distance.y -= _this.step);
+              _this.distance.y -= _this.step;
             } else if (c.y === 'bottom') {
-              results.push(_this.distance.y += _this.step);
+              _this.distance.y += _this.step;
+            }
+            if (c.x !== null && c.y !== null) {
+              results.push(action(o.type));
             } else {
               results.push(void 0);
             }
@@ -109,7 +162,7 @@ Player = (function() {
 module.exports = Player;
 
 
-},{"./collision":1}],3:[function(require,module,exports){
+},{"./action":1,"./collision":2}],5:[function(require,module,exports){
 var Rock;
 
 Rock = (function() {
@@ -126,6 +179,7 @@ Rock = (function() {
     PIXI.loader.add("rock-" + n, 'assets/rock.png').load((function(_this) {
       return function(loader, resources) {
         _this.texture = new PIXI.Sprite(resources["rock-" + n].texture);
+        _this.texture.type = 'rock';
         _this.texture.width = 100;
         _this.texture.height = 100;
         _this.texture.position.x = x;
@@ -145,12 +199,14 @@ Rock = (function() {
 module.exports = Rock;
 
 
-},{}],4:[function(require,module,exports){
-var Player, Rock, animate, h, renderer, rock0, rock1, rock2, rock3, updateCamera, w;
+},{}],6:[function(require,module,exports){
+var Jack, Player, Rock, animate, h, renderer, rock0, rock1, rock2, rock3, updateCamera, w;
 
 Player = require('./player');
 
 Rock = require('./rock');
+
+Jack = require('./jack');
 
 window.staticObjects = [];
 
@@ -168,11 +224,11 @@ window.stage = new PIXI.Container();
 
 rock0 = new Rock(50, 50, 0);
 
-rock1 = new Rock(50, 700, 1);
+rock1 = new Jack(50, 700, 0);
 
-rock2 = new Rock(900, 50, 2);
+rock2 = new Rock(900, 50, 1);
 
-rock3 = new Rock(900, 700, 3);
+rock3 = new Jack(900, 700, 1);
 
 window.player = new Player(w / 2, h / 2);
 
@@ -187,7 +243,7 @@ animate = function() {
 animate();
 
 
-},{"./player":2,"./rock":3,"./updateCamera":5}],5:[function(require,module,exports){
+},{"./jack":3,"./player":4,"./rock":5,"./updateCamera":7}],7:[function(require,module,exports){
 var updateCamera;
 
 updateCamera = function() {
@@ -205,4 +261,4 @@ updateCamera = function() {
 module.exports = updateCamera;
 
 
-},{}]},{},[4])
+},{}]},{},[6])

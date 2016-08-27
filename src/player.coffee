@@ -1,9 +1,12 @@
 collision = require './collision'
+action = require './action'
 
 class Player
   constructor: (x = 0, y = 0) ->
     PIXI.loader.add('player', 'assets/player.png').load (loader, resources) =>
       @texture = new PIXI.Sprite resources.player.texture
+
+      @texture.type = 'player'
 
       @texture.width = 150
       @texture.height = 150
@@ -39,6 +42,9 @@ class Player
             @distance.y -= @step
           else if c.y is 'bottom' # up
             @distance.y += @step
+
+          if c.x isnt null and c.y isnt null
+            action o.type
 
   texture: null
   step: 10
