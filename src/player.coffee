@@ -6,23 +6,36 @@ class Player
       @texture.width = 150
       @texture.height = 150
 
-      @texture.position.x = x
-      @texture.position.y = y
+      x -= @texture.width / 2
+      y -= @texture.height / 2
 
-      world.addChild @texture
+      @texture.position.x = @x = x
+      @texture.position.y = @y = y
+
+      stage.addChild @texture
 
       window.onkeydown = (e) =>
         switch e.keyCode
           when 87 # up
-            @texture.position.y -= 10
+            @y -= @step
+            @distance.y -= @step
           when 83 # down
-            @texture.position.y += 10
+            @y += @step
+            @distance.y += @step
           when 68 # right
-            @texture.position.x += 10
+            @x += @step
+            @distance.x += @step
           when 65 # left
-            @texture.position.x -= 10
+            @x -= @step
+            @distance.x -= @step
 
   texture: null
+  step: 10
+  x: 0
+  y: 0
+  distance:
+    x: 0
+    y: 0
 
 # export
 module.exports = Player
