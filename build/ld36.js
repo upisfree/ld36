@@ -200,9 +200,59 @@ module.exports = Rock;
 
 
 },{}],6:[function(require,module,exports){
-var Jack, Player, Rock, animate, h, renderer, rock0, rock1, rock2, rock3, updateCamera, w;
+var Sound;
+
+Sound = (function() {
+  function Sound(url, x, y, _loop, volume) {
+    this.x = x;
+    this.y = y;
+    this.sound = new Howl({
+      src: [url],
+      loop: _loop,
+      preload: true,
+      volume: volume
+    });
+    this.sound.pos(x, y, 0);
+    this.sound.pannerAttr({
+      panningModel: 'HRTF',
+      refDistance: 0.8,
+      rolloffFactor: 2.5,
+      distanceModel: 'exponential'
+    });
+    staticSounds.push(this);
+  }
+
+  Sound.prototype.play = function() {
+    return this.sound.play();
+  };
+
+  Sound.prototype.pause = function() {
+    return this.sound.pause();
+  };
+
+  Sound.prototype.stop = function() {
+    return this.sound.stop();
+  };
+
+  Sound.prototype.sound = null;
+
+  Sound.prototype.x = 0;
+
+  Sound.prototype.y = 0;
+
+  return Sound;
+
+})();
+
+module.exports = Sound;
+
+
+},{}],7:[function(require,module,exports){
+var Jack, Player, Rock, Sound, animate, renderer, rock0, rock3, s1, s2, updateCamera, updateSounds;
 
 Player = require('./player');
+
+Sound = require('./sound');
 
 Rock = require('./rock');
 
@@ -210,11 +260,15 @@ Jack = require('./jack');
 
 window.staticObjects = [];
 
-w = window.innerWidth;
+window.staticSounds = [];
 
-h = window.innerHeight;
+window.w = window.innerWidth;
+
+window.h = window.innerHeight;
 
 updateCamera = require('./updateCamera');
+
+updateSounds = require('./updateSounds');
 
 renderer = new PIXI.WebGLRenderer(w, h);
 
@@ -222,19 +276,24 @@ document.body.appendChild(renderer.view);
 
 window.stage = new PIXI.Container();
 
-rock0 = new Rock(50, 50, 0);
+rock0 = new Rock(-500, -500, 0);
 
-rock1 = new Jack(50, 700, 0);
+rock3 = new Jack(1500, 1500, 1);
 
-rock2 = new Rock(900, 50, 1);
+s1 = new Sound('./assets/sounds/baby-crying.wav', -500, -500, true, 0.1);
 
-rock3 = new Jack(900, 700, 1);
+s2 = new Sound('./assets/sounds/girl-crying.wav', 1500, 1500, true, 1);
+
+s1.play();
+
+s2.play();
 
 window.player = new Player(w / 2, h / 2);
 
 animate = function() {
   requestAnimationFrame(animate);
   if (player.texture) {
+    updateSounds();
     updateCamera();
   }
   return renderer.render(stage);
@@ -243,7 +302,7 @@ animate = function() {
 animate();
 
 
-},{"./jack":3,"./player":4,"./rock":5,"./updateCamera":7}],7:[function(require,module,exports){
+},{"./jack":3,"./player":4,"./rock":5,"./sound":6,"./updateCamera":8,"./updateSounds":9}],8:[function(require,module,exports){
 var updateCamera;
 
 updateCamera = function() {
@@ -261,4 +320,31 @@ updateCamera = function() {
 module.exports = updateCamera;
 
 
-},{}]},{},[6])
+},{}],9:[function(require,module,exports){
+var updateSounds;
+
+updateSounds = function() {
+  var i, j, len, mul, p, pos, results, x, y;
+  p = player;
+  mul = 2;
+  results = [];
+  for (j = 0, len = staticSounds.length; j < len; j++) {
+    i = staticSounds[j];
+    i.x -= p.distance.x;
+    i.y -= p.distance.y;
+    pos = i.sound.pos();
+    x = i.x / window.w * mul;
+    y = i.y / window.h * mul;
+    if (!isNaN(x) && !isNaN(y)) {
+      results.push(i.sound.pos(x, y, 0));
+    } else {
+      results.push(void 0);
+    }
+  }
+  return results;
+};
+
+module.exports = updateSounds;
+
+
+},{}]},{},[7])

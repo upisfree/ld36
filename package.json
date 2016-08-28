@@ -20,8 +20,5 @@
   "bugs": {
     "url": "https://github.com/upisfree/ld36/issues"
   },
-  "homepage": "https://github.com/upisfree/ld36",
-  "dependencies": {
-    "pixi-filters": "^1.0.5"
-  }
+  "homepage": "https://github.com/upisfree/ld36"
 }
