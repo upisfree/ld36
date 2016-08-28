@@ -9,12 +9,14 @@ action = (o) ->
         temperature -= 25
 
   if o.type isnt 'snow'
-    o.texture.alpha = 0.5
+    o.texture.alpha = 0
 
     o.isUsed = true
     o.sound.pause()
 
-    generate()
+    # alert 'Вообще, ты выиграл. Но если хочешь, поищи еще младенцев в снегу :3'
+
+    # generate(false)
 
 # export
 module.exports = action

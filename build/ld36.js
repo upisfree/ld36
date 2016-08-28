@@ -14,10 +14,9 @@ action = function(o) {
     }
   }
   if (o.type !== 'snow') {
-    o.texture.alpha = 0.5;
+    o.texture.alpha = 0;
     o.isUsed = true;
-    o.sound.pause();
-    return generate();
+    return o.sound.pause();
   }
 };
 
@@ -114,7 +113,7 @@ module.exports = collision;
 var end;
 
 end = function() {
-  console.log('end');
+  alert('Ты замерз. И умер. Хм.');
   return location.reload();
 };
 
@@ -132,13 +131,32 @@ r = function(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 };
 
-generate = function() {
-  var m;
-  m = 2500;
-  if (Math.random() > 0.5) {
-    return new Baby(r(m * -1, m), r(m * -1, m));
+generate = function(first, x, y) {
+  var i, j, k, m, results, results1;
+  if (first == null) {
+    first = false;
+  }
+  if (x && y) {
+    results = [];
+    for (i = j = 0; j <= 4; i = ++j) {
+      if (Math.random() > 0.5) {
+        results.push(new Baby(x, y));
+      } else {
+        results.push(new Girl(x, y));
+      }
+    }
+    return results;
   } else {
-    return new Girl(r(m * -1, m), r(m * -1, m));
+    m = 2000;
+    results1 = [];
+    for (i = k = 0; k <= 4; i = ++k) {
+      if (Math.random() > 0.5) {
+        results1.push(new Baby(r(m * -1, m), r(m * -1, m)));
+      } else {
+        results1.push(new Girl(r(m * -1, m), r(m * -1, m)));
+      }
+    }
+    return results1;
   }
 };
 
@@ -158,14 +176,14 @@ Baby = (function() {
     if (y == null) {
       y = 0;
     }
-    this.texture = PIXI.Sprite.fromImage('assets/textures/4.jpg');
+    this.texture = PIXI.Sprite.fromImage('assets/textures/baby.png');
     this.texture.type = 'baby';
     this.texture.isUsed = false;
     this.texture.width = 100;
     this.texture.height = 100;
     this.texture.position.x = x;
     this.texture.position.y = y;
-    this.sound = new Sound('./assets/sounds/baby-crying.wav', x, y, true, 1);
+    this.sound = new Sound('./assets/sounds/baby-crying.wav', x, y, true, 0.4);
     this.sound.play();
     stage.addChild(this.texture);
     staticObjects.push(this);
@@ -198,14 +216,14 @@ Girl = (function() {
     if (n == null) {
       n = 0;
     }
-    this.texture = PIXI.Sprite.fromImage('assets/textures/1.jpg');
+    this.texture = PIXI.Sprite.fromImage('assets/textures/baby.png');
     this.type = 'girl';
     this.isUsed = false;
     this.texture.width = 100;
     this.texture.height = 100;
     this.texture.position.x = x;
     this.texture.position.y = y;
-    this.sound = new Sound('./assets/sounds/girl-crying.wav', x, y, true, 1);
+    this.sound = new Sound('./assets/sounds/baby-crying.wav', x, y, true, 0.4);
     this.sound.play();
     stage.addChild(this.texture);
     staticObjects.push(this);
@@ -321,7 +339,7 @@ Player = (function() {
 
   Player.prototype.texture = null;
 
-  Player.prototype.step = 10;
+  Player.prototype.step = 5;
 
   Player.prototype.distance = {
     x: 0,
@@ -424,7 +442,7 @@ module.exports = Sound;
 
 
 },{}],11:[function(require,module,exports){
-var Player, animate, blizzard, end, filter, generate, renderer, snow, updateCamera, updateSounds, wind;
+var Player, animate, blizzard, dfilter, end, filter, generate, renderer, snow, updateCamera, updateSounds, wind;
 
 Player = require('./player');
 
@@ -450,7 +468,7 @@ end = require('./end');
 
 window.temperature = 0;
 
-window.maxTemperature = 400;
+window.maxTemperature = 100;
 
 renderer = new PIXI.WebGLRenderer(w, h);
 
@@ -462,34 +480,56 @@ window.stage = new PIXI.Container();
 
 window.player = new Player(w / 2, h / 2);
 
+window.heart = PIXI.Sprite.fromImage("assets/textures/heart.gif");
+
+heart.width = 50 * 2;
+
+heart.height = 70 * 2;
+
+heart.position.x = heart.width * 1.25;
+
+heart.position.y = heart.height * 1.25;
+
+stage.addChild(heart);
+
 wind = new Howl({
   src: ['assets/sounds/wind.wav'],
   volume: 0.4,
+  loop: true,
   preload: true
 });
 
 wind.play();
 
-generate();
+generate(true);
 
 blizzard.generate();
 
 snow();
 
+dfilter = new PIXI.filters.DisplacementFilter(PIXI.Sprite.fromImage('assets/textures/map.jpg'), 0, 0);
+
 filter = new PIXI.filters.ColorMatrixFilter();
 
-stage.filters = [filter];
+stage.filters = [filter, dfilter];
 
 filter.blackAndWhite();
 
 animate = function() {
   requestAnimationFrame(animate);
-  if (temperature >= maxTemperature) {
+  if (heart.width === 20 || heart.height === 20) {
+    generate(player.texture.position.x - 100, player.texture.position.y - 100);
+  }
+  if (heart.width <= 0 || heart.height <= 0) {
     end();
   }
-  temperature += 0.1;
+  temperature += 0.05;
+  dfilter.scale.x = Math.sin(temperature) * 100;
+  dfilter.scale.y = -Math.cos(temperature) * 100;
   player.filter.scale.x = Math.sin(temperature) * 400;
-  player.filter.scale.y = Math.sin(temperature) * 400;
+  player.filter.scale.y = -Math.cos(temperature) * 2000;
+  heart.width -= 0.05;
+  heart.height -= 0.05;
   if (player.texture) {
     updateSounds();
     updateCamera();

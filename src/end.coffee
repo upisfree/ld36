@@ -1,5 +1,5 @@
 end = ->
-  console.log 'end'
+  alert 'Ты замерз. И умер. Хм.'
 
   location.reload()
 

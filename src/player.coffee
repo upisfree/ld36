@@ -73,7 +73,7 @@ class Player
           action o
 
   texture: null
-  step: 10
+  step: 5
   distance:
     x: 0
     y: 0

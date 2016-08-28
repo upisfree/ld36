@@ -2,7 +2,7 @@ Sound = require '../sound'
 
 class Girl
   constructor: (x = 0, y = 0, n = 0) ->
-    @texture = PIXI.Sprite.fromImage 'assets/textures/1.jpg'
+    @texture = PIXI.Sprite.fromImage 'assets/textures/baby.png'
 
     @type = 'girl'
     @isUsed = false
@@ -13,7 +13,7 @@ class Girl
     @texture.position.x = x
     @texture.position.y = y
 
-    @sound = new Sound './assets/sounds/girl-crying.wav', x, y, true, 1
+    @sound = new Sound './assets/sounds/baby-crying.wav', x, y, true, 0.4
     @sound.play()
 
     stage.addChild @texture
