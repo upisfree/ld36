@@ -495,6 +495,14 @@ stage.filters = [dfilter];
 
 filter.blackAndWhite();
 
+setTimeout(function() {
+  return document.getElementsByClassName('black')[0].style.display = 'none';
+}, 7000);
+
+setTimeout(function() {
+  return document.getElementsByClassName('start')[0].style.display = 'none';
+}, 4000);
+
 animate = function() {
   requestAnimationFrame(animate);
   ticks += 1;

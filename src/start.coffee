@@ -51,6 +51,14 @@ stage.filters = [dfilter]
 
 filter.blackAndWhite()
 
+setTimeout ->
+  document.getElementsByClassName('black')[0].style.display = 'none'
+, 7000
+
+setTimeout ->
+  document.getElementsByClassName('start')[0].style.display = 'none'
+, 4000
+
 animate = ->
   requestAnimationFrame animate
 
