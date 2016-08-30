@@ -9,7 +9,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, user-scalable=no">
 
-    <link href="http://fonts.googleapis.com/css?family=Noto+Serif:400,400italic,700&subset=latin,cyrillic" rel="stylesheet" type="text/css">
+    <link href="./lib/animate.css" rel="stylesheet" type="text/css">
 
     <title>ld36</title>
 
@@ -23,11 +23,31 @@ body
 
 canvas
 {
-  z-index: 10;
+  /*z-index: 10;*/
+}
+
+.black
+{
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  /*z-index: 20;*/
+}
+
+.start
+{
+  /*display: none;*/
+  /*z-index: 30;*/
 }
     </style>
   </head>
   <body>
+    <div class="black"></div>
+    <img class="animated fadeIn start" src="./assets/start.png">
+
     <script src="./lib/howler.min.js"></script>
     <script src="./lib/pixi.min.js"></script>
     <script src="./lib/filters.min.js"></script>

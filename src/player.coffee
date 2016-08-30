@@ -56,15 +56,15 @@ collisionWithLevel = (x, y) ->
   pw = 150
   ph = 150
 
-  ox = currentLevelX
-  oy = currentLevelY
-  ow = 250
-  oh = 250
+  ox = window.currentLevelX
+  oy = window.currentLevelY
+  ow = 300
+  oh = 300
 
   if ((px < ox + ow && px + pw > ox + ow) || (px < ox && px + pw > ox)) &&
      ((py < oy && oy < py + ph) || (py + ph > oy + oh && py < oy + oh))
     console.log 'collision'
-    currentLevelSound.pause()
+    window.currentLevelSound.pause()
     level()
 
 class Player
@@ -98,7 +98,7 @@ class Player
 
           addFootprint @texture.position.x, @texture.position.y, Math.PI / 2
 
-          collisionWithLevel()
+          collisionWithLevel @texture.position.x, @texture.position.y
         when 83 # down
           @distance.y += @step
           
@@ -106,7 +106,7 @@ class Player
 
           addFootprint @texture.position.x, @texture.position.y, 3 * Math.PI / 2
 
-          collisionWithLevel()
+          collisionWithLevel @texture.position.x, @texture.position.y
         when 68 # right
           @distance.x += @step
           
@@ -114,7 +114,7 @@ class Player
 
           addFootprint @texture.position.x, @texture.position.y, Math.PI * 2
 
-          collisionWithLevel()
+          collisionWithLevel @texture.position.x, @texture.position.y
         when 65 # left
           @distance.x -= @step
 
@@ -122,7 +122,7 @@ class Player
 
           addFootprint @texture.position.x, @texture.position.y, Math.PI
 
-          collisionWithLevel()
+          collisionWithLevel @texture.position.x, @texture.position.y
 
       for o in staticObjects
         c = collision o

@@ -124,7 +124,7 @@ module.exports = end;
 
 
 },{}],6:[function(require,module,exports){
-var Sound, addBody, addCampfire, addCar, level, r, songs;
+var Sound, addBody, addCampfire, addCar, addTV, level, r, songs;
 
 Sound = require('./sound');
 
@@ -168,13 +168,22 @@ addBody = function(x, y) {
   return stage.addChild(sprite);
 };
 
-songs = ['./assets/sounds/dream.mp3', './assets/sounds/where.mp3', './assets/sounds/quiet.mp3'];
+addTV = function(x, y) {
+  var sprite;
+  sprite = PIXI.Sprite.fromImage('assets/textures/tv.png');
+  sprite.position.x = x;
+  sprite.position.y = y;
+  staticObjects.push(sprite);
+  return stage.addChild(sprite);
+};
+
+songs = ['./assets/sounds/dream.mp3', './assets/sounds/quiet.mp3', './assets/sounds/where.mp3', './assets/sounds/cheat.mp3', './assets/sounds/test.mp3', './assets/sounds/lili.mp3', './assets/sounds/gone.mp3', './assets/sounds/doll.mp3', './assets/sounds/thing.mp3', './assets/sounds/home.mp3', './assets/sounds/some.mp3'];
 
 level = function() {
-  var currentLevelSound, currentLevelX, currentLevelY, m, x, y;
+  var m, x, y;
   m = 2000;
-  x = currentLevelX = r(m * -1, m);
-  y = currentLevelY = r(m * -1, m);
+  x = window.currentLevelX = r(m * -1, m);
+  y = window.currentLevelY = r(m * -1, m);
   addCampfire(x, y + 100);
   if (Math.random() > 0.75) {
     addBody(x + 350, y);
@@ -182,8 +191,11 @@ level = function() {
   if (Math.random() > 0.5) {
     addCar(x - 150, y - 200);
   }
-  currentLevelSound = new Sound(songs[r(0, songs.length - 1)], x, y, true, 0.5);
-  return currentLevelSound.play();
+  if (Math.random() > 0.5) {
+    addTV(x - 400, y - 100);
+  }
+  window.currentLevelSound = new Sound(songs[r(0, songs.length - 1)], x, y, true, 0.4);
+  return window.currentLevelSound.play();
 };
 
 module.exports = level;
@@ -258,13 +270,13 @@ collisionWithLevel = function(x, y) {
   py = y;
   pw = 150;
   ph = 150;
-  ox = currentLevelX;
-  oy = currentLevelY;
-  ow = 250;
-  oh = 250;
+  ox = window.currentLevelX;
+  oy = window.currentLevelY;
+  ow = 300;
+  oh = 300;
   if (((px < ox + ow && px + pw > ox + ow) || (px < ox && px + pw > ox)) && ((py < oy && oy < py + ph) || (py + ph > oy + oh && py < oy + oh))) {
     console.log('collision');
-    currentLevelSound.pause();
+    window.currentLevelSound.pause();
     return level();
   }
 };
@@ -298,25 +310,25 @@ Player = (function() {
             _this.distance.y -= _this.step;
             playStep();
             addFootprint(_this.texture.position.x, _this.texture.position.y, Math.PI / 2);
-            collisionWithLevel();
+            collisionWithLevel(_this.texture.position.x, _this.texture.position.y);
             break;
           case 83:
             _this.distance.y += _this.step;
             playStep();
             addFootprint(_this.texture.position.x, _this.texture.position.y, 3 * Math.PI / 2);
-            collisionWithLevel();
+            collisionWithLevel(_this.texture.position.x, _this.texture.position.y);
             break;
           case 68:
             _this.distance.x += _this.step;
             playStep();
             addFootprint(_this.texture.position.x, _this.texture.position.y, Math.PI * 2);
-            collisionWithLevel();
+            collisionWithLevel(_this.texture.position.x, _this.texture.position.y);
             break;
           case 65:
             _this.distance.x -= _this.step;
             playStep();
             addFootprint(_this.texture.position.x, _this.texture.position.y, Math.PI);
-            collisionWithLevel();
+            collisionWithLevel(_this.texture.position.x, _this.texture.position.y);
         }
         results = [];
         for (j = 0, len = staticObjects.length; j < len; j++) {
@@ -388,7 +400,7 @@ Sound = (function() {
     this.sound.pos(x, y, 0);
     this.sound.pannerAttr({
       panningModel: 'HRTF',
-      refDistance: 0.8,
+      refDistance: 0.1,
       rolloffFactor: 2.5,
       distanceModel: 'exponential'
     });
@@ -473,11 +485,13 @@ level();
 
 blizzard.generate();
 
-dfilter = new PIXI.filters.DisplacementFilter(PIXI.Sprite.fromImage('assets/textures/maaap.jpg'), 0, 0);
+dfilter = new PIXI.filters.DisplacementFilter(PIXI.Sprite.fromImage('assets/textures/maaap.jpg'));
+
+dfilter.padding = 100;
 
 filter = new PIXI.filters.ColorMatrixFilter();
 
-stage.filters = [filter, dfilter];
+stage.filters = [dfilter];
 
 filter.blackAndWhite();
 
@@ -512,6 +526,8 @@ updateCamera = function() {
     i.position.x -= p.distance.x;
     i.position.y -= p.distance.y;
   }
+  window.currentLevelX -= p.distance.x;
+  window.currentLevelY -= p.distance.y;
   p.distance.x = 0;
   return p.distance.y = 0;
 };

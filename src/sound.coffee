@@ -13,7 +13,7 @@ class Sound
 
     @sound.pannerAttr
       panningModel: 'HRTF'
-      refDistance: 0.8
+      refDistance: 0.1
       rolloffFactor: 2.5
       distanceModel: 'exponential'
 

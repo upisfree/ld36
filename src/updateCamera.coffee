@@ -5,6 +5,9 @@ updateCamera = ->
     i.position.x -= p.distance.x
     i.position.y -= p.distance.y
 
+  window.currentLevelX -= p.distance.x
+  window.currentLevelY -= p.distance.y
+
   p.distance.x = 0
   p.distance.y = 0
 

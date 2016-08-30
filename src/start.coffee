@@ -43,10 +43,11 @@ level()
 
 blizzard.generate()
 
-dfilter = new PIXI.filters.DisplacementFilter PIXI.Sprite.fromImage('assets/textures/maaap.jpg'), 0, 0
+dfilter = new PIXI.filters.DisplacementFilter PIXI.Sprite.fromImage('assets/textures/maaap.jpg')
+dfilter.padding = 100
 
 filter = new PIXI.filters.ColorMatrixFilter()
-stage.filters = [filter, dfilter]
+stage.filters = [dfilter]
 
 filter.blackAndWhite()
 

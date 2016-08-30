@@ -43,13 +43,28 @@ addBody = (x, y) ->
 
   stage.addChild sprite
 
-songs = ['./assets/sounds/dream.mp3', './assets/sounds/where.mp3', './assets/sounds/quiet.mp3']
+addTV = (x, y) ->
+  sprite = PIXI.Sprite.fromImage 'assets/textures/tv.png'
+
+  sprite.position.x = x
+  sprite.position.y = y
+
+  staticObjects.push sprite
+
+  stage.addChild sprite
+
+songs = ['./assets/sounds/dream.mp3', './assets/sounds/quiet.mp3',
+         './assets/sounds/where.mp3', './assets/sounds/cheat.mp3',
+         './assets/sounds/test.mp3', './assets/sounds/lili.mp3',
+         './assets/sounds/gone.mp3', './assets/sounds/doll.mp3',
+         './assets/sounds/thing.mp3', './assets/sounds/home.mp3',
+         './assets/sounds/some.mp3']
 
 level = ->
   m = 2000
 
-  x = currentLevelX = r m * -1, m
-  y = currentLevelY = r m * -1, m
+  x = window.currentLevelX = r m * -1, m
+  y = window.currentLevelY = r m * -1, m
 
   addCampfire x, y + 100
   
@@ -59,8 +74,11 @@ level = ->
   if Math.random() > 0.5
     addCar x - 150, y - 200
 
-  currentLevelSound = new Sound songs[r(0, songs.length - 1)], x, y, true, 0.5
-  currentLevelSound.play()
+  if Math.random() > 0.5
+    addTV x - 400, y - 100
+
+  window.currentLevelSound = new Sound songs[r(0, songs.length - 1)], x, y, true, 0.4
+  window.currentLevelSound.play()
 
 # export
 module.exports = level
