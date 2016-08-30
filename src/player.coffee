@@ -1,5 +1,6 @@
 collision = require './collision'
 action = require './action'
+level = require './level'
 
 stepSound1 = new Howl
   src: ['assets/sounds/step-1.wav']
@@ -22,6 +23,50 @@ playStep = ->
       stepSound2.play()
       _currendStep = 'second'
 
+
+footprintsContainer = new PIXI.particles.ParticleContainer 1000,
+  position: true
+  rotation: true
+
+addFootprint = (x, y, r) ->
+  if stepSound1.playing() and Math.random() > 0.75
+    print = PIXI.Sprite.fromImage 'assets/textures/footprint.png'
+    print.anchor.set 0.5
+    print.position.x = x + 10 # размеры текстуры игрока, некогда сделать хорошо
+    print.position.y = y + 150
+    print.width *= 1.5
+    print.height *= 1.5
+    print.rotation = Math.PI / 2
+
+    footprintsContainer.addChild print
+  else if stepSound2.playing() and Math.random() > 0.95
+    print2 = PIXI.Sprite.fromImage 'assets/textures/footprint.png'
+    print2.anchor.set 0.5
+    print2.position.x = x + 50 # размеры текстуры игрока, некогда сделать хорошо
+    print2.position.y = y + 150
+    print2.width *= 1.5
+    print2.height *= 1.5
+    print2.rotation = 3 * Math.PI / 2
+
+    footprintsContainer.addChild print2
+
+collisionWithLevel = (x, y) ->
+  px = x
+  py = y
+  pw = 150
+  ph = 150
+
+  ox = currentLevelX
+  oy = currentLevelY
+  ow = 250
+  oh = 250
+
+  if ((px < ox + ow && px + pw > ox + ow) || (px < ox && px + pw > ox)) &&
+     ((py < oy && oy < py + ph) || (py + ph > oy + oh && py < oy + oh))
+    console.log 'collision'
+    currentLevelSound.pause()
+    level()
+
 class Player
   constructor: (x = 0, y = 0) ->
     @texture = PIXI.Sprite.fromImage 'assets/textures/player.png'
@@ -39,25 +84,48 @@ class Player
     @filter = new PIXI.filters.DisplacementFilter PIXI.Sprite.fromImage('assets/textures/map.jpg'), 200, 200
     @texture.filters = [@filter]
 
+    @footprintsContainer = footprintsContainer
+    stage.addChild @footprintsContainer
+
     stage.addChild @texture
 
     window.onkeydown = (e) =>
       switch e.keyCode
         when 87 # up
           @distance.y -= @step
-          playStep()
-        when 83 # down
-          @distance.y += @step
-          playStep()
-        when 68 # right
-          @distance.x += @step
-          playStep()
-        when 65 # left
-          @distance.x -= @step
+          
           playStep()
 
+          addFootprint @texture.position.x, @texture.position.y, Math.PI / 2
+
+          collisionWithLevel()
+        when 83 # down
+          @distance.y += @step
+          
+          playStep()
+
+          addFootprint @texture.position.x, @texture.position.y, 3 * Math.PI / 2
+
+          collisionWithLevel()
+        when 68 # right
+          @distance.x += @step
+          
+          playStep()
+
+          addFootprint @texture.position.x, @texture.position.y, Math.PI * 2
+
+          collisionWithLevel()
+        when 65 # left
+          @distance.x -= @step
+
+          playStep()
+
+          addFootprint @texture.position.x, @texture.position.y, Math.PI
+
+          collisionWithLevel()
+
       for o in staticObjects
-        c = collision o.texture
+        c = collision o
 
         if c.x is 'left' # right
           @distance.x -= @step
@@ -72,7 +140,14 @@ class Player
         if c.x isnt null and c.y isnt null
           action o
 
-  texture: null
+  updateFootprints: ->
+    if @footprintsContainer.children.length >= 1000
+      @footprintsContainer.children.splice 0, 1
+
+    for i in @footprintsContainer.children
+      i.position.x -= @distance.x
+      i.position.y -= @distance.y
+
   step: 5
   distance:
     x: 0

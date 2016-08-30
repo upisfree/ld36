@@ -1,29 +1,31 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-var action, generate;
+var action;
 
-generate = require('./generate');
-
-action = function(o) {
-  if (!o.isUsed) {
-    switch (o.type) {
-      case 'girl':
-        temperature -= 50;
-        break;
-      case 'baby':
-        temperature -= 25;
-    }
-  }
-  if (o.type !== 'snow') {
-    o.texture.alpha = 0;
-    o.isUsed = true;
-    return o.sound.pause();
-  }
-};
+action = function(o) {};
 
 module.exports = action;
 
 
-},{"./generate":5}],2:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
+var background;
+
+background = {
+  generate: function() {
+    var texture;
+    texture = PIXI.Texture.fromImage('assets/textures/snow.png');
+    this.tilingSprite = new PIXI.extras.TilingSprite(texture, 3000, 3000);
+    return stage.addChild(this.tilingSprite);
+  },
+  update: function() {
+    this.tilingSprite.tilePosition.x -= player.distance.x;
+    return this.tilingSprite.tilePosition.y -= player.distance.y;
+  }
+};
+
+module.exports = background;
+
+
+},{}],3:[function(require,module,exports){
 var blizzard;
 
 blizzard = {
@@ -51,13 +53,14 @@ blizzard = {
     return stage.addChild(this.container);
   },
   update: function() {
-    var flake, j, len, ref, results;
+    var cos, flake, j, len, ref, results;
+    cos = Math.cos(ticks / 20) * 10;
     ref = this.sprites;
     results = [];
     for (j = 0, len = ref.length; j < len; j++) {
       flake = ref[j];
-      flake.position.x += 30;
-      flake.position.y += 10;
+      flake.position.x += 30 - cos;
+      flake.position.y += 10 + cos;
       if (flake.position.x > window.w) {
         flake.position.x = Math.random() * -50;
       }
@@ -75,7 +78,7 @@ blizzard = {
 module.exports = blizzard;
 
 
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 var collision;
 
 collision = function(o) {
@@ -109,7 +112,7 @@ collision = function(o) {
 module.exports = collision;
 
 
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 var end;
 
 end = function() {
@@ -120,132 +123,80 @@ end = function() {
 module.exports = end;
 
 
-},{}],5:[function(require,module,exports){
-var Baby, Girl, generate, r;
+},{}],6:[function(require,module,exports){
+var Sound, addBody, addCampfire, addCar, level, r, songs;
 
-Baby = require('./npc/baby');
-
-Girl = require('./npc/girl');
+Sound = require('./sound');
 
 r = function(min, max) {
   return Math.floor(Math.random() * (max - min) + min);
 };
 
-generate = function(first, x, y) {
-  var i, j, k, m, results, results1;
-  if (first == null) {
-    first = false;
+addCampfire = function(x, y) {
+  var frames, i, j, len, mc, texture, textures;
+  frames = ['campfire-1.png', 'campfire-2.png', 'campfire-3.png', 'campfire-4.png', 'campfire-5.png'];
+  textures = [];
+  for (j = 0, len = frames.length; j < len; j++) {
+    i = frames[j];
+    texture = PIXI.Texture.fromImage("assets/textures/campfire/" + i);
+    textures.push(texture);
   }
-  if (x && y) {
-    results = [];
-    for (i = j = 0; j <= 4; i = ++j) {
-      if (Math.random() > 0.5) {
-        results.push(new Baby(x, y));
-      } else {
-        results.push(new Girl(x, y));
-      }
-    }
-    return results;
-  } else {
-    m = 2000;
-    results1 = [];
-    for (i = k = 0; k <= 4; i = ++k) {
-      if (Math.random() > 0.5) {
-        results1.push(new Baby(r(m * -1, m), r(m * -1, m)));
-      } else {
-        results1.push(new Girl(r(m * -1, m), r(m * -1, m)));
-      }
-    }
-    return results1;
-  }
+  mc = new PIXI.extras.MovieClip(textures);
+  mc.position.x = x;
+  mc.position.y = y;
+  mc.animationSpeed = 0.2;
+  mc.play();
+  staticObjects.push(mc);
+  return stage.addChild(mc);
 };
 
-module.exports = generate;
+addCar = function(x, y) {
+  var sprite;
+  sprite = PIXI.Sprite.fromImage('assets/textures/car.png');
+  sprite.position.x = x;
+  sprite.position.y = y;
+  staticObjects.push(sprite);
+  return stage.addChild(sprite);
+};
 
+addBody = function(x, y) {
+  var sprite;
+  sprite = PIXI.Sprite.fromImage('assets/textures/body.png');
+  sprite.position.x = x;
+  sprite.position.y = y;
+  staticObjects.push(sprite);
+  return stage.addChild(sprite);
+};
 
-},{"./npc/baby":6,"./npc/girl":7}],6:[function(require,module,exports){
-var Baby, Sound;
+songs = ['./assets/sounds/dream.mp3', './assets/sounds/where.mp3', './assets/sounds/quiet.mp3'];
 
-Sound = require('../sound');
-
-Baby = (function() {
-  function Baby(x, y) {
-    if (x == null) {
-      x = 0;
-    }
-    if (y == null) {
-      y = 0;
-    }
-    this.texture = PIXI.Sprite.fromImage('assets/textures/baby.png');
-    this.texture.type = 'baby';
-    this.texture.isUsed = false;
-    this.texture.width = 100;
-    this.texture.height = 100;
-    this.texture.position.x = x;
-    this.texture.position.y = y;
-    this.sound = new Sound('./assets/sounds/baby-crying.wav', x, y, true, 0.4);
-    this.sound.play();
-    stage.addChild(this.texture);
-    staticObjects.push(this);
+level = function() {
+  var currentLevelSound, currentLevelX, currentLevelY, m, x, y;
+  m = 2000;
+  x = currentLevelX = r(m * -1, m);
+  y = currentLevelY = r(m * -1, m);
+  addCampfire(x, y + 100);
+  if (Math.random() > 0.75) {
+    addBody(x + 350, y);
   }
-
-  Baby.prototype.texture = null;
-
-  Baby.prototype.sound = null;
-
-  return Baby;
-
-})();
-
-module.exports = Baby;
-
-
-},{"../sound":10}],7:[function(require,module,exports){
-var Girl, Sound;
-
-Sound = require('../sound');
-
-Girl = (function() {
-  function Girl(x, y, n) {
-    if (x == null) {
-      x = 0;
-    }
-    if (y == null) {
-      y = 0;
-    }
-    if (n == null) {
-      n = 0;
-    }
-    this.texture = PIXI.Sprite.fromImage('assets/textures/baby.png');
-    this.type = 'girl';
-    this.isUsed = false;
-    this.texture.width = 100;
-    this.texture.height = 100;
-    this.texture.position.x = x;
-    this.texture.position.y = y;
-    this.sound = new Sound('./assets/sounds/baby-crying.wav', x, y, true, 0.4);
-    this.sound.play();
-    stage.addChild(this.texture);
-    staticObjects.push(this);
+  if (Math.random() > 0.5) {
+    addCar(x - 150, y - 200);
   }
+  currentLevelSound = new Sound(songs[r(0, songs.length - 1)], x, y, true, 0.5);
+  return currentLevelSound.play();
+};
 
-  Girl.prototype.texture = null;
-
-  Girl.prototype.sound = null;
-
-  return Girl;
-
-})();
-
-module.exports = Girl;
+module.exports = level;
 
 
-},{"../sound":10}],8:[function(require,module,exports){
-var Player, _currendStep, action, collision, playStep, stepSound1, stepSound2;
+},{"./sound":8}],7:[function(require,module,exports){
+var Player, _currendStep, action, addFootprint, collision, collisionWithLevel, footprintsContainer, level, playStep, stepSound1, stepSound2;
 
 collision = require('./collision');
 
 action = require('./action');
+
+level = require('./level');
 
 stepSound1 = new Howl({
   src: ['assets/sounds/step-1.wav'],
@@ -273,6 +224,51 @@ playStep = function() {
   }
 };
 
+footprintsContainer = new PIXI.particles.ParticleContainer(1000, {
+  position: true,
+  rotation: true
+});
+
+addFootprint = function(x, y, r) {
+  var print, print2;
+  if (stepSound1.playing() && Math.random() > 0.75) {
+    print = PIXI.Sprite.fromImage('assets/textures/footprint.png');
+    print.anchor.set(0.5);
+    print.position.x = x + 10;
+    print.position.y = y + 150;
+    print.width *= 1.5;
+    print.height *= 1.5;
+    print.rotation = Math.PI / 2;
+    return footprintsContainer.addChild(print);
+  } else if (stepSound2.playing() && Math.random() > 0.95) {
+    print2 = PIXI.Sprite.fromImage('assets/textures/footprint.png');
+    print2.anchor.set(0.5);
+    print2.position.x = x + 50;
+    print2.position.y = y + 150;
+    print2.width *= 1.5;
+    print2.height *= 1.5;
+    print2.rotation = 3 * Math.PI / 2;
+    return footprintsContainer.addChild(print2);
+  }
+};
+
+collisionWithLevel = function(x, y) {
+  var oh, ow, ox, oy, ph, pw, px, py;
+  px = x;
+  py = y;
+  pw = 150;
+  ph = 150;
+  ox = currentLevelX;
+  oy = currentLevelY;
+  ow = 250;
+  oh = 250;
+  if (((px < ox + ow && px + pw > ox + ow) || (px < ox && px + pw > ox)) && ((py < oy && oy < py + ph) || (py + ph > oy + oh && py < oy + oh))) {
+    console.log('collision');
+    currentLevelSound.pause();
+    return level();
+  }
+};
+
 Player = (function() {
   function Player(x, y) {
     if (x == null) {
@@ -291,31 +287,41 @@ Player = (function() {
     this.texture.position.y = y;
     this.filter = new PIXI.filters.DisplacementFilter(PIXI.Sprite.fromImage('assets/textures/map.jpg'), 200, 200);
     this.texture.filters = [this.filter];
+    this.footprintsContainer = footprintsContainer;
+    stage.addChild(this.footprintsContainer);
     stage.addChild(this.texture);
     window.onkeydown = (function(_this) {
       return function(e) {
-        var c, i, len, o, results;
+        var c, j, len, o, results;
         switch (e.keyCode) {
           case 87:
             _this.distance.y -= _this.step;
             playStep();
+            addFootprint(_this.texture.position.x, _this.texture.position.y, Math.PI / 2);
+            collisionWithLevel();
             break;
           case 83:
             _this.distance.y += _this.step;
             playStep();
+            addFootprint(_this.texture.position.x, _this.texture.position.y, 3 * Math.PI / 2);
+            collisionWithLevel();
             break;
           case 68:
             _this.distance.x += _this.step;
             playStep();
+            addFootprint(_this.texture.position.x, _this.texture.position.y, Math.PI * 2);
+            collisionWithLevel();
             break;
           case 65:
             _this.distance.x -= _this.step;
             playStep();
+            addFootprint(_this.texture.position.x, _this.texture.position.y, Math.PI);
+            collisionWithLevel();
         }
         results = [];
-        for (i = 0, len = staticObjects.length; i < len; i++) {
-          o = staticObjects[i];
-          c = collision(o.texture);
+        for (j = 0, len = staticObjects.length; j < len; j++) {
+          o = staticObjects[j];
+          c = collision(o);
           if (c.x === 'left') {
             _this.distance.x -= _this.step;
           } else if (c.x === 'right') {
@@ -337,7 +343,20 @@ Player = (function() {
     })(this);
   }
 
-  Player.prototype.texture = null;
+  Player.prototype.updateFootprints = function() {
+    var i, j, len, ref, results;
+    if (this.footprintsContainer.children.length >= 1000) {
+      this.footprintsContainer.children.splice(0, 1);
+    }
+    ref = this.footprintsContainer.children;
+    results = [];
+    for (j = 0, len = ref.length; j < len; j++) {
+      i = ref[j];
+      i.position.x -= this.distance.x;
+      results.push(i.position.y -= this.distance.y);
+    }
+    return results;
+  };
 
   Player.prototype.step = 5;
 
@@ -353,47 +372,7 @@ Player = (function() {
 module.exports = Player;
 
 
-},{"./action":1,"./collision":3}],9:[function(require,module,exports){
-var Snow, r, snow;
-
-r = function(min, max) {
-  return Math.floor(Math.random() * (max - min) + min);
-};
-
-Snow = (function() {
-  function Snow() {
-    this.texture = PIXI.Sprite.fromImage("assets/textures/snow/snow" + (r(1, 5)) + ".png");
-    this.texture.type = 'snow';
-    this.texture.isUsed = true;
-    this.texture.width = 100;
-    this.texture.height = 100;
-    this.texture.position.x = r(-3000, 3000);
-    this.texture.position.y = r(-3000, 3000);
-    stage.addChild(this.texture);
-    staticObjects.push(this);
-  }
-
-  Snow.prototype.texture = null;
-
-  return Snow;
-
-})();
-
-snow = function() {
-  var i, j, results;
-  this.container = new PIXI.Container();
-  stage.addChild(this.container);
-  results = [];
-  for (i = j = 0; j <= 100; i = ++j) {
-    results.push(new Snow());
-  }
-  return results;
-};
-
-module.exports = snow;
-
-
-},{}],10:[function(require,module,exports){
+},{"./action":1,"./collision":4,"./level":6}],8:[function(require,module,exports){
 var Sound;
 
 Sound = (function() {
@@ -441,14 +420,20 @@ Sound = (function() {
 module.exports = Sound;
 
 
-},{}],11:[function(require,module,exports){
-var Player, animate, blizzard, dfilter, end, filter, generate, renderer, snow, updateCamera, updateSounds, wind;
+},{}],9:[function(require,module,exports){
+var Player, animate, background, blizzard, dfilter, end, filter, level, renderer, updateCamera, updateSounds, wind;
 
 Player = require('./player');
 
 window.staticObjects = [];
 
 window.staticSounds = [];
+
+window.currentLevelX = 0;
+
+window.currentLevelY = 0;
+
+window.currentLevelSound = null;
 
 window.w = window.innerWidth;
 
@@ -458,17 +443,17 @@ updateCamera = require('./updateCamera');
 
 updateSounds = require('./updateSounds');
 
-generate = require('./generate');
-
-blizzard = require('./blizzard');
-
-snow = require('./snow');
+level = require('./level');
 
 end = require('./end');
 
-window.temperature = 0;
+blizzard = require('./blizzard');
 
-window.maxTemperature = 100;
+wind = require('./wind');
+
+background = require('./background');
+
+window.ticks = 0;
 
 renderer = new PIXI.WebGLRenderer(w, h);
 
@@ -478,36 +463,17 @@ document.body.appendChild(renderer.view);
 
 window.stage = new PIXI.Container();
 
+background.generate();
+
 window.player = new Player(w / 2, h / 2);
-
-window.heart = PIXI.Sprite.fromImage("assets/textures/heart.gif");
-
-heart.width = 50 * 2;
-
-heart.height = 70 * 2;
-
-heart.position.x = heart.width * 1.25;
-
-heart.position.y = heart.height * 1.25;
-
-stage.addChild(heart);
-
-wind = new Howl({
-  src: ['assets/sounds/wind.wav'],
-  volume: 0.4,
-  loop: true,
-  preload: true
-});
 
 wind.play();
 
-generate(true);
+level();
 
 blizzard.generate();
 
-snow();
-
-dfilter = new PIXI.filters.DisplacementFilter(PIXI.Sprite.fromImage('assets/textures/map.jpg'), 0, 0);
+dfilter = new PIXI.filters.DisplacementFilter(PIXI.Sprite.fromImage('assets/textures/maaap.jpg'), 0, 0);
 
 filter = new PIXI.filters.ColorMatrixFilter();
 
@@ -517,21 +483,15 @@ filter.blackAndWhite();
 
 animate = function() {
   requestAnimationFrame(animate);
-  if (heart.width === 20 || heart.height === 20) {
-    generate(player.texture.position.x - 100, player.texture.position.y - 100);
-  }
-  if (heart.width <= 0 || heart.height <= 0) {
-    end();
-  }
-  temperature += 0.05;
-  dfilter.scale.x = Math.sin(temperature) * 100;
-  dfilter.scale.y = -Math.cos(temperature) * 100;
-  player.filter.scale.x = Math.sin(temperature) * 400;
-  player.filter.scale.y = -Math.cos(temperature) * 2000;
-  heart.width -= 0.05;
-  heart.height -= 0.05;
+  ticks += 1;
+  dfilter.scale.x = Math.sin(ticks / 20) * 100;
+  dfilter.scale.y = -Math.cos(ticks / 20) * 100;
+  player.filter.scale.x = Math.sin(ticks / 20) * 100;
+  player.filter.scale.y = -Math.cos(ticks / 20) * 200;
   if (player.texture) {
     updateSounds();
+    background.update();
+    player.updateFootprints();
     updateCamera();
   }
   blizzard.update();
@@ -541,7 +501,7 @@ animate = function() {
 animate();
 
 
-},{"./blizzard":2,"./end":4,"./generate":5,"./player":8,"./snow":9,"./updateCamera":12,"./updateSounds":13}],12:[function(require,module,exports){
+},{"./background":2,"./blizzard":3,"./end":5,"./level":6,"./player":7,"./updateCamera":10,"./updateSounds":11,"./wind":12}],10:[function(require,module,exports){
 var updateCamera;
 
 updateCamera = function() {
@@ -549,8 +509,8 @@ updateCamera = function() {
   p = player;
   for (j = 0, len = staticObjects.length; j < len; j++) {
     i = staticObjects[j];
-    i.texture.position.x -= p.distance.x;
-    i.texture.position.y -= p.distance.y;
+    i.position.x -= p.distance.x;
+    i.position.y -= p.distance.y;
   }
   p.distance.x = 0;
   return p.distance.y = 0;
@@ -559,7 +519,7 @@ updateCamera = function() {
 module.exports = updateCamera;
 
 
-},{}],13:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 var updateSounds;
 
 updateSounds = function() {
@@ -586,4 +546,17 @@ updateSounds = function() {
 module.exports = updateSounds;
 
 
-},{}]},{},[11])
+},{}],12:[function(require,module,exports){
+var wind;
+
+wind = new Howl({
+  src: ['assets/sounds/wind.wav'],
+  volume: 0.4,
+  loop: true,
+  preload: true
+});
+
+module.exports = wind;
+
+
+},{}]},{},[9])

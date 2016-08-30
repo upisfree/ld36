@@ -23,10 +23,10 @@ blizzard =
 
     stage.addChild @container
   update: ->
+    cos = Math.cos(ticks / 20) * 10
     for flake in @sprites
-      # flake.position.x += Math.cos(temperature) * 1
-      flake.position.x += 30
-      flake.position.y += 10
+      flake.position.x += 30 - cos
+      flake.position.y += 10 + cos
 
       if flake.position.x > window.w
         flake.position.x = Math.random() * -50
