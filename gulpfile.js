@@ -11,7 +11,7 @@ gulp.task('build', function ()
   return gulp.src('./src/start.coffee', { read: false })
              .pipe(browserify({ transform: ['coffeeify'], extensions: ['.coffee'] }))
              .pipe(concat('ld36.js'))
-             // .pipe(uglify())
+             .pipe(uglify())
              .pipe(gulp.dest('./build'));
 });
 
